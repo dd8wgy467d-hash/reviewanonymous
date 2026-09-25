@@ -1,0 +1,436 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Length-Independent State Tracking</title>
+    <meta
+      name="description"
+      content="Interactive companion to the paper “Length-Independent State Tracking Under a Parallel Scan”: every section of the paper paired with a figure you can run."
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+    <script>
+      window.MathJax = {
+        tex: { inlineMath: [["\\(", "\\)"]], displayMath: [["\\[", "\\]"]] },
+        options: { enableMenu: false },
+      };
+    </script>
+    <script defer src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-mml-chtml.js"></script>
+  </head>
+  <body>
+    <header class="topbar">
+      <a class="brand" href="#top">Length-independent state tracking <span>interactive companion</span></a>
+      <button id="theme-toggle" class="nb-btn ghost" type="button">☾ Dark</button>
+    </header>
+
+    <nav class="toc" aria-label="Contents">
+      <div class="toc-title">Paper ↔ notebook</div>
+      <ol>
+        <li><a href="#s1"><b>§1</b> Why length independence</a></li>
+        <li><a href="#s2"><b>§2</b> Automata, RNNs, finite precision</a></li>
+        <li><a href="#s3"><b>§3</b> Three conditions, two rates</a></li>
+        <li><a href="#s4"><b>§4</b> Affine: one rate</a></li>
+        <li><a href="#s5"><b>§5</b> The scan as a budget</a></li>
+        <li><a href="#s6"><b>§6</b> The NFSM</a></li>
+        <li><a href="#s7"><b>§7</b> Experiments</a></li>
+        <li><a href="#s8"><b>§8</b> Discussion</a></li>
+      </ol>
+    </nav>
+
+    <main class="article" id="top">
+      <!-- ================================================================ -->
+      <header class="hero">
+        <p class="kicker">Interactive companion · anonymous ICLR 2027 submission</p>
+        <h1>Length-Independent State Tracking Under a Parallel Scan</h1>
+        <p class="dek">
+          To track a finite state at every sequence length, a recurrent network must, in one update, erase its own
+          numerical error <em>and</em> execute the next transition. Each figure below runs one step of that argument.
+        </p>
+      </header>
+
+      <p class="llm-note">
+        This notebook was generated with a large language model from the paper. The authors reviewed its content.
+      </p>
+
+      <section class="howto">
+        <h2 class="small">How to read this page</h2>
+        <p>
+          Read it next to the PDF: the tag <span class="paperref inline">Paper §3 · Thm 3.1</span> names the part of
+          the paper each section follows. Every figure runs in your browser, except N10 and N12, which show trained
+          models. <code>&lt;/&gt; Code</code> flips a figure to the code it runs, with your settings
+          <span class="live">highlighted</span>. Where a figure samples perturbations, the <b>worst case</b> box makes
+          each one exactly of size η.
+        </p>
+        <div class="nb-table-wrap">
+          <table class="nb-table map">
+            <thead>
+              <tr><th>Paper</th><th>Notebook</th><th>What you do</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>§2, Defs 2.1–2.2</td><td><a href="#n1">N1</a>, <a href="#n2">N2</a></td><td>run an automaton; watch an affine RNN realize ℤ<sub>5</sub>, then lose it</td></tr>
+              <tr><td>§3, Thms 3.1–3.3, Fig. 1</td><td><a href="#n3">N3</a>, <a href="#n4">N4</a></td><td>switch restoration on and off; compare one rate with two</td></tr>
+              <tr><td>§4, App. E, Fig. 3</td><td><a href="#n5">N5</a>, <a href="#n6">N6</a></td><td>watch a perfectly trained rotation drift; see why definite words survive</td></tr>
+              <tr><td>§5, App. D, Fig. 2</td><td><a href="#n7">N7</a></td><td>scan over tables, then over affine maps in fp16</td></tr>
+              <tr><td>§6, App. G</td><td><a href="#n8">N8</a>, <a href="#n9">N9</a></td><td>edit the logits of an NFSM head; split S<sub>3</sub> over two heads</td></tr>
+              <tr><td>§7, App. H</td><td><a href="#n10">N10</a>–<a href="#n12">N12</a></td><td>browse the results; read a TSO story; look at trained states</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ================================================================ -->
+      <section id="s1">
+        <p class="paperref">Paper §1 · Introduction</p>
+        <h2>1 · Why ask for length independence?</h2>
+        <p>
+          The recurrences that scale (state space models, gated linear RNNs, linear attention) are affine in the
+          hidden state, so a parallel scan evaluates them in \(O(\log L)\) depth. Trained on state tracking, they work
+          up to the training length and then collapse. The paper isolates the part of that gap that training cannot
+          remove, <b>finite precision</b>, and asks: what must an RNN satisfy to track a state at every length? Can an
+          affine recurrence satisfy it? If not, can a scan-compatible one?
+        </p>
+      </section>
+
+      <!-- ================================================================ -->
+      <section id="s2">
+        <p class="paperref">Paper §2 · Formalization · State tracking and automata</p>
+        <h2>2 · Automata, RNNs, and finite precision</h2>
+        <p>
+          A task is a semiautomaton \((Q,\Sigma,\delta)\). A word \(w\) acts on the states through the composite map
+          \(\delta_w\), and these maps form the transition monoid \(M_\delta\).
+        </p>
+      </section>
+
+      <figure class="nb-figure" id="n1">
+        <figcaption><span class="fig-no">N1</span> A semiautomaton, and a word as the map \(\delta_w\) it induces on \(Q\).</figcaption>
+        <div class="try">
+          <b>Try this</b>
+          <ul>
+            <li><b>Flip-flop</b>: read <code>set</code>, then <code>id</code>s: \(\delta_w\) is constant. From a reset, <code>id</code> alone keeps \(\delta_w\) the identity at any length. An affine tracker cannot hold that (N6).</li>
+            <li><b>\(\mathbb{Z}_5\)</b>: \(\delta_w\) is always a rotation, never constant.</li>
+            <li><b>\(S_3\)</b>: <code>(1 2)</code> then <code>(2 3)</code>, then the reverse order: the results differ.</li>
+          </ul>
+        </div>
+        <div id="fig-automata" class="nb-fig-body"></div>
+      </figure>
+
+      <section>
+        <p class="paperref">Paper §2 · eqs. (1)–(3) · Definitions 2.1–2.2 · App. D, Lemma D.1</p>
+        <h3>Realization at finite precision</h3>
+        <p>
+          An RNN realizes the automaton through an encoding \(\iota\), an update \(\Phi_x\) and a readout \(\pi\)
+          (eq. 3). Finite precision is modelled as a perturbation of size at most \(\eta\) at every step; every machine
+          run is such an η-trajectory (Lemma D.1). Length independence asks for <b>(T1)</b> a correct readout on
+          <em>every</em> η-trajectory and <b>(T2)</b> a bounded reachable set \(U^\star\). The guarantee is worst-case:
+          failing it means no guarantee, not that every run fails (App. D).
+        </p>
+        <p>
+          N2 is the smallest affine realization of \(\mathbb Z_5\): \(A_x = \rho R(2\pi x/5)\). The dashed disk holds the
+          endpoints of all η-trajectories; its radius follows \(r_t = \rho\, r_{t-1} + \eta\).
+        </p>
+      </section>
+
+      <figure class="nb-figure" id="n2">
+        <figcaption><span class="fig-no">N2</span> An affine RNN realizing \(\mathbb Z_5\), under per-step perturbations of size \(\eta\).</figcaption>
+        <div class="try">
+          <b>Try this</b>
+          <ul>
+            <li>At \(\rho = 1\), press <code>+100 random</code> a few times. The samples still read correctly after the disk has crossed a boundary: (T1) fails when <em>some</em> η-trajectory is misread, at \(L^\star\).</li>
+            <li>Tick <b>worst case</b>: every step now moves exactly \(\eta\), and the samples spread faster.</li>
+            <li>Set \(\rho = 0.97\): the disk stops growing, so (T2) holds, but the code shrinks toward the centre, where \(\pi\) is undefined.</li>
+          </ul>
+        </div>
+        <div id="fig-dial" class="nb-fig-body"></div>
+      </figure>
+
+      <!-- ================================================================ -->
+      <section id="s3">
+        <p class="paperref">Paper §3 · Theorems 3.1–3.2 · eq. (4) · Figure 1</p>
+        <h2>3 · Three conditions on one step, two rates in one map</h2>
+        <p>
+          Theorem 3.1 reduces length independence to three conditions on one step: <b>(R1)</b> a decodable code,
+          <b>(R2)</b> restoration, \(\Phi_x(U)\oplus\bar B_\eta \subseteq U\), and <b>(R3)</b> a correct transition
+          under perturbation. Equivalently, every cell must land inside its successor cell with a margin \(\eta\)
+          (eq. 4). One map must be both an <em>executive</em> and a <em>restoring</em> organ. N3 is Figure 1 live:
+          \(\lambda\) is how much one step contracts a cell.
+        </p>
+      </section>
+
+      <figure class="nb-figure" id="n3">
+        <figcaption><span class="fig-no">N3</span> Executing the transition and restoring the state (the paper's Figure 1, live).</figcaption>
+        <div class="try">
+          <b>Try this</b>
+          <ul>
+            <li>\(\lambda = 1\): the reachable set widens every step until it straddles two cells, and the readout is no longer determined by the word.</li>
+            <li>\(\lambda = 0.6\): the set stops growing and eq. (4) holds.</li>
+            <li>\(\lambda = 0\), then raise \(\eta\): the narrow cell \(U_{q_4}\) fails first.</li>
+          </ul>
+        </div>
+        <div id="fig-spacetime" class="nb-fig-body"></div>
+      </figure>
+
+      <section>
+        <p class="paperref">Paper §3 · Theorem 3.3 · Lemma F.11</p>
+        <h3>Two rates in one map</h3>
+        <p>
+          Along any word, eq. (4) needs <b>local contraction</b> inside cells and <b>global separation</b> between them
+          (Thm 3.3). The hardest word <em>holds</em> two states, like <code>id</code> in the flip-flop; every
+          non-definite automaton has one (Lemma F.11). N4 iterates such a map from both code points \(\pm1\).
+        </p>
+      </section>
+
+      <figure class="nb-figure" id="n4">
+        <figcaption><span class="fig-no">N4</span> Holding one bit: one rate everywhere (affine) against two rates in one map (multistable).</figcaption>
+        <div class="try">
+          <b>Try this</b>
+          <ul>
+            <li><b>Affine</b>, \(a = 0.95\): the two runs merge into 0. At \(a = 1\) they stay apart, but the perturbations pile up. No slope does both.</li>
+            <li><b>Multistable</b>, \(\beta = 2\): the rate is below 1 inside the cells and above 1 between them, so two cells are held.</li>
+            <li><b>Exactly restoring</b>: each cell collapses onto its attractor in one step, like the NFSM (N8).</li>
+          </ul>
+        </div>
+        <div id="fig-tworates" class="nb-fig-body"></div>
+      </figure>
+
+      <!-- ================================================================ -->
+      <section id="s4">
+        <p class="paperref">Paper §4.1 · eq. (5) · Theorem 4.1 · App. C.2 · App. E, Figure 3</p>
+        <h2>4 · An affine recurrence supplies a single rate</h2>
+        <p>
+          In an affine recurrence, \(\Phi_w(h) - \Phi_w(h') = A_w (h-h')\) (eq. 5): one operator moves both the signal and
+          the perturbation. By Theorem 4.1, if \(\rho(A_w)\ge 1\) for some word, perturbations accumulate; if
+          \(\rho(A_w) &lt; 1\) for every word, old inputs are forgotten and only <em>definite</em> automata are realized.
+          Most scan-compatible architectures sit on one of the two branches (App. C.2).
+        </p>
+        <p>
+          Even perfect training does not help (App. E). N5 takes the exact \(\rho = 1\) realization of \(\mathbb Z_7\), a
+          rotation by \(2\pi/7\), rounds its entries once to a number format, and runs it in fp64. The stored rotation
+          has a slightly wrong angle and radius, so the phase error grows until the readout is wrong.
+        </p>
+      </section>
+
+      <figure class="nb-figure" id="n5">
+        <figcaption><span class="fig-no">N5</span> The exact \(\mathbb Z_7\) rotation, rounded once to each format, then run in fp64 (the paper's Figure 3).</figcaption>
+        <div class="try">
+          <b>Try this</b>
+          <ul>
+            <li>Press <b>Play</b> with bf16: the dot slides away from its ring, and the readout fails at \(t = 291\).</li>
+            <li>Switch to fp32 and skip to just before the first error: it fails too, near \(2.7\times10^7\) steps. A finer format moves the failure but does not remove it.</li>
+            <li>Try the fp8 formats: the radius drifts as fast as the angle.</li>
+          </ul>
+        </div>
+        <div id="fig-drift" class="nb-fig-body"></div>
+      </figure>
+
+      <section>
+        <p class="paperref">Paper §4.1 · Def. F.10, Prop. F.13 · §7, Table 1</p>
+        <h3>Forgetting is harmless only for definite targets</h3>
+        <p>
+          A <em>definite</em> automaton depends only on its last \(k\) inputs, and a contracting affine map realizes
+          every such target (Prop. F.13). The flip-flop shows the boundary: DFF<sub>5</sub> never draws more than four
+          identities in a row, while FF draws runs of any length.
+        </p>
+      </section>
+
+      <figure class="nb-figure" id="n6">
+        <figcaption><span class="fig-no">N6</span> A contracting tracker holds definite words and loses the others.</figcaption>
+        <div class="try">
+          <b>Try this</b>
+          <ul>
+            <li>Affine tracker: DFF<sub>5</sub> reaches 100% and FF fails, as Mamba\(^-\) and PD-SSM do in Table 1.</li>
+            <li>Raise \(\kappa\), the fraction of \(h\) that an <code>id</code> step keeps: the window \(k^\star\) widens, but FF still fails once identity runs get long.</li>
+            <li>Switch to the restoring tracker: 100% on both.</li>
+          </ul>
+        </div>
+        <div id="fig-flipflop" class="nb-fig-body"></div>
+      </figure>
+
+      <section>
+        <p class="paperref">Paper §4.2 · Lemma F.17 · Prop. F.22 · Theorem F.25</p>
+        <h3>Two rates require multistability</h3>
+        <p>
+          An affine step that satisfies (R2) has a single fixed point, so it holds at most one cell, at any width
+          (Prop. F.22), and a stack of affine layers does no better (Thm F.25). The nonlinearity must act on
+          \(h_{t-1}\) itself (Lemma F.17). PD-SSM's hardmax acts on the input, so its step stays affine.
+        </p>
+      </section>
+
+      <!-- ================================================================ -->
+      <section id="s5">
+        <p class="paperref">Paper §5 · Definition 5.1 · Proposition 5.2</p>
+        <h2>5 · Scan compatibility is a budget, not affinity</h2>
+        <p>
+          A parallel scan needs every composite \(\Phi_w\) stored in \(b\) bits and merged in \(c\) operations
+          (Def. 5.1). Then only finitely many hidden states are reachable, and the recurrence acts on them as a table
+          (Prop. 5.2). An exactly restoring recurrence sends each basin to one attractor, so each symbol is a table on
+          \(K\) indices: \(K\lceil\log_2 K\rceil\) bits, \(K\) lookups per merge, and every merge is exact.
+        </p>
+      </section>
+
+      <figure class="nb-figure" id="n7">
+        <figcaption><span class="fig-no">N7</span> (a) A parallel scan over transition tables. Every merge is a gather, and the result is exact.</figcaption>
+        <div id="fig-scan-tree" class="nb-fig-body"></div>
+      </figure>
+
+      <section>
+        <p class="paperref">Paper §5 · App. D, Figure 2</p>
+        <p>
+          Affine composites are rounded instead, and floating-point arithmetic is not associative, so a scan and a
+          sequential loop return different trajectories. N7 (b) reruns a small version of Figure 2.
+        </p>
+      </section>
+
+      <figure class="nb-figure" id="n7b">
+        <figcaption><span class="fig-no">N7</span> (b) The same affine model, evaluated sequentially and by a parallel scan, drifts apart.</figcaption>
+        <div class="try">
+          <b>Try this</b>
+          <ul>
+            <li>fp16: the contracting gap saturates and the isometric gap keeps growing, as Theorem 4.1 predicts.</li>
+            <li>fp32: every curve moves down but keeps its shape.</li>
+          </ul>
+        </div>
+        <div id="fig-scan-gap" class="nb-fig-body"></div>
+      </figure>
+
+      <!-- ================================================================ -->
+      <section id="s6">
+        <p class="paperref">Paper §6 · eq. (6) · Props. G.1–G.3</p>
+        <h2>6 · The neural finite-state machine</h2>
+        <p>
+          An NFSM head updates \(\Phi_x(h) = \mathrm{rd}(\theta_x\, \mathrm{rd}(h))\) (eq. 6), where \(\mathrm{rd}\)
+          keeps the one-hot vector of the largest coordinate and \(\theta_x\) is a logit matrix computed from the
+          input. The inner \(\mathrm{rd}\) restores; the outer step executes, sending index \(k\) to the row of the
+          largest entry of column \(k\). The head is correct when these tables match the target (Prop. G.2), and a
+          logit perturbation below half the column margin \(\gamma\) changes nothing, at any length (Prop. G.3).
+        </p>
+      </section>
+
+      <figure class="nb-figure" id="n8">
+        <figcaption><span class="fig-no">N8</span> One NFSM head: logits → table → run.</figcaption>
+        <div class="try">
+          <b>Try this</b>
+          <ul>
+            <li>Start from <em>random logits</em> and click the dashed target cell of each wrong column until every column shows ✓: you have trained the head by hand.</li>
+            <li>Tick <b>worst case</b>, set the state perturbation to 0.49 and run 100,000 steps: no errors.</li>
+            <li>Raise the logit perturbation past \(\gamma/2\): errors appear, each one a whole wrong index.</li>
+          </ul>
+        </div>
+        <div id="fig-nfsm" class="nb-fig-body"></div>
+      </figure>
+
+      <section>
+        <p class="paperref">Paper §6 · Prop. G.4 · Example G.7 · App. H.6.2</p>
+        <h3>Heads as memory channels</h3>
+        <p>
+          A block of heads reads the same input and updates independently (Prop. G.4). The trained \(S_3\) model uses
+          one 3-index head for the image of point 1 and one 2-index head for the sign.
+        </p>
+      </section>
+
+      <figure class="nb-figure" id="n9">
+        <figcaption><span class="fig-no">N9</span> \(S_3\) carried by two heads: the extracted tables of the trained model (seed 42).</figcaption>
+        <div id="fig-heads" class="nb-fig-body"></div>
+      </figure>
+
+      <!-- ================================================================ -->
+      <section id="s7">
+        <p class="paperref">Paper §7 · Table 1 · App. H.4, Table 5 · App. H.6</p>
+        <h2>7 · Experiments</h2>
+        <p>
+          One NFSM layer (two on TSO) is compared with four-layer Mamba\(^-\) (\(\rho &lt; 1\)), AUSSM (\(\rho = 1\)) and
+          PD-SSM (\(\rho &lt; 1\)). A † means the tables read off the trained NFSM match the target, which certifies
+          correctness at every length.
+        </p>
+      </section>
+
+      <figure class="nb-figure" id="n10">
+        <figcaption><span class="fig-no">N10</span> Failing length on algebraic and textual state-tracking tasks (Table 1, with the seeds of Table 5).</figcaption>
+        <div class="try">
+          <b>Try this</b>
+          <ul>
+            <li>Compare DFF<sub>5</sub> with FF: the contracting baselines pass the definite words only, as in N6.</li>
+            <li>Show <em>every seed</em>: Mamba\(^-\) on \(\mathbb Z_2\) ranges from 326 to ≥ 512k. A horizon measured on one model does not transfer to the next.</li>
+          </ul>
+        </div>
+        <div id="fig-results" class="nb-fig-body"></div>
+      </figure>
+
+      <section>
+        <p class="paperref">Paper §7 · App. H.1 · App. H.6.3, Figure 5</p>
+        <h3>Tracking Shuffled Objects</h3>
+        <p>
+          TSO<sub>N</sub> gives the same algebra as text: people swap items, then a question asks who holds one. In the
+          trained two-layer NFSM, each second-layer head holds the holder of one item.
+        </p>
+      </section>
+
+      <figure class="nb-figure" id="n11">
+        <figcaption><span class="fig-no">N11</span> A TSO<sub>N</sub> stream and the automaton state it drives.</figcaption>
+        <div id="fig-tso" class="nb-fig-body"></div>
+      </figure>
+
+      <section>
+        <p class="paperref">Paper App. H.5 · Figure 4</p>
+        <h3>What the trained states look like</h3>
+        <p>
+          The recurrent state on \(\mathbb Z_5\) under \((+1)^T\), projected on two principal components. The NFSM
+          visits five fixed points. Mamba\(^-\) collapses onto one point (\(\rho&lt;1\)), AUSSM's clusters interleave
+          (\(\rho=1\)), and PD-SSM loses the separation too.
+        </p>
+      </section>
+
+      <figure class="nb-figure" id="n12">
+        <figcaption><span class="fig-no">N12</span> Recurrent states of trained models on \(\mathbb Z_5\), projected on two principal components.</figcaption>
+        <div id="fig-pca" class="nb-fig-body"></div>
+      </figure>
+
+      <!-- ================================================================ -->
+      <section id="s8">
+        <p class="paperref">Paper §8 · Discussion · App. B</p>
+        <h2>8 · What to take away</h2>
+        <ul class="takeaways">
+          <li><b>One map, two jobs.</b> Contract inside cells, separate between them (N3, N4). An affine map has one rate, at any width and depth.</li>
+          <li><b>An undeclared context window.</b> A contracting model forgets beyond a length set by its gates and its arithmetic, without warning (N6).</li>
+          <li><b>Not an artifact of precision.</b> A finer format moves the horizon but does not remove it (N5).</li>
+          <li><b>Verified, not extrapolated.</b> An NFSM's automaton can be read off its logits (N8–N10).</li>
+          <li><b>Scope.</b> Finite-state tracking only; unbounded counting remains open.</li>
+        </ul>
+      </section>
+
+      <footer class="foot">
+        <p>
+          Companion to <em>Length-Independent State Tracking Under a Parallel Scan</em> (anonymous submission).
+          Generated with a large language model from the paper; the authors reviewed its content. Source code:
+          <span class="todo">[anonymous link]</span>. N10 and N12 show trained models; every other figure runs in your
+          browser.
+        </p>
+      </footer>
+    </main>
+
+    <script src="js/core.js"></script>
+    <script src="js/tasks.js"></script>
+    <script src="js/code.js"></script>
+    <script src="js/fig-automata.js"></script>
+    <script src="js/fig-dial.js"></script>
+    <script src="js/fig-spacetime.js"></script>
+    <script src="js/fig-tworates.js"></script>
+    <script src="js/fig-drift.js"></script>
+    <script src="js/fig-flipflop.js"></script>
+    <script src="js/fig-scan.js"></script>
+    <script src="js/fig-nfsm.js"></script>
+    <script src="js/fig-heads.js"></script>
+    <script src="js/fig-results.js"></script>
+    <script src="js/fig-tso.js"></script>
+    <script src="js/fig-pca.js"></script>
+    <script>
+      NB.initTheme();
+      NB.boot();
+    </script>
+  </body>
+</html>

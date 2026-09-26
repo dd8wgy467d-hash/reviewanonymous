@@ -20,7 +20,7 @@
     let firstErr = null;
     let last = null; // details of the last step
     let delta = 0; // logit perturbation
-    let worst = false; // perturbations of size exactly η
+    let worst = true; // perturbations of size exactly η
     let etaS = 0.3; // state perturbation (sup-norm)
     const rand = NB.rng(31);
 
@@ -47,15 +47,8 @@
     const runRow = NB.controls(pR, "nb-symbols");
     const sl = NB.controls(pR);
     NB.slider(sl, { label: "state perturbation ‖e‖<sub>∞</sub>", min: 0, max: 0.6, step: 0.01, value: etaS, format: (v) => v.toFixed(2), onInput: (v) => ((etaS = v), NB.live("fig-nfsm", { eta_s: v })) });
-    const sD = NB.slider(sl, { label: "logit perturbation |Δ<sub>jk</sub>|", min: 0, max: 3, step: 0.01, value: delta, format: (v) => v.toFixed(2), onInput: (v) => ((delta = v), paintStats(), NB.live("fig-nfsm", { delta: v })) });
+    NB.slider(sl, { label: "logit perturbation |Δ<sub>jk</sub>|", min: 0, max: 3, step: 0.01, value: delta, format: (v) => v.toFixed(2), onInput: (v) => ((delta = v), NB.live("fig-nfsm", { delta: v })) });
     NB.worstToggle(sl, (v) => ((worst = v), NB.live("fig-nfsm", { worst: v ? "True" : "False" })));
-    const stats = NB.h("div", { class: "nb-stats" });
-    root.appendChild(stats);
-    const sTab = NB.stat(stats, "table σ<sub>x</sub> vs target δ<sub>x</sub>", "wide");
-    const sGam = NB.stat(stats, "smallest column margin γ (all symbols)");
-    const sGuar = NB.stat(stats, "Prop. G.3: |Δ| &lt; γ/2?");
-    const sRun = NB.stat(stats, "steps run / misread positions");
-
     function setup(mode) {
       task = taskKey === "Z5" ? NB.tasks.cyclic(5) : NB.tasks.flipflop();
       d = task.n;
@@ -122,7 +115,7 @@
     }
     const noise = () => NB.perturb(rand, delta, worst);
     function stepHead(x) {
-      // restoring organ: the state is perturbed, rd reads its largest coordinate
+      // inner rd: the stored state is perturbed, rd reads its largest coordinate back
       const h = Array.from({ length: d }, (_, j) => (j === k ? 1 : 0) + NB.perturb(rand, etaS, worst));
       const kr = h.indexOf(Math.max(...h));
       // executive organ: column kr of the (perturbed) logits, then rd
@@ -207,33 +200,13 @@
       const g = NB.s("g", {}, rsvg);
       const colW = 106;
       bars(g, 10, 44, last.h, last.kr, "h + e", "perturbed state");
-      bars(g, 10 + colW, 44, last.h.map((_, j) => (j === last.kr ? 1 : 0)), last.kr, "rd(h + e)", "restoring organ");
-      bars(g, 10 + 2 * colW, 44, last.col, last.kn, `θ_x rd(·)`, `column ${task.states[last.kr]} of θ_${task.symbols[last.x].label}`);
-      bars(g, 10 + 3 * colW, 44, last.col.map((_, j) => (j === last.kn ? 1 : 0)), last.kn, "rd(·) = h_t", "executive organ");
+      bars(g, 10 + colW, 44, last.h.map((_, j) => (j === last.kr ? 1 : 0)), last.kr, "rd(h + e)", "inner rd");
+      bars(g, 10 + 2 * colW, 44, last.col, last.kn, `θ_x rd(·)`, `executive organ: column ${task.states[last.kr]} of θ_${task.symbols[last.x].label}`);
+      bars(g, 10 + 3 * colW, 44, last.col.map((_, j) => (j === last.kn ? 1 : 0)), last.kn, "rd(·) = h_t", "restoring organ");
       for (let i = 0; i < 3; i++) NB.s("text", { x: 10 + (i + 1) * colW - 14, y: 84, class: "svg-note", text: "→" }, g);
       const ok = last.kn === q;
       NB.s("text", { x: 10, y: 196, class: "svg-note " + (ok ? "good" : "bad"), text: `index ${task.states[last.kn]}, target ${task.states[q]} ${ok ? "✓" : "✗"}` }, g);
       NB.s("text", { x: 10, y: 214, class: "svg-note", text: "The state is carried as an index; e is erased by the first rd as long as ‖e‖∞ < 1/2." }, g);
-    }
-
-    function paintStats() {
-      const tab = table(theta[cur]);
-      const tgt = NB.table(task, cur);
-      const same = tab.every((v, i) => v === tgt[i]);
-      sTab.set(`σ = (${tab.map((v) => task.states[v]).join(", ")})  vs  δ = (${tgt.map((v) => task.states[v]).join(", ")})`, same ? "good" : "bad");
-      let allOk = true;
-      let gam = Infinity;
-      task.symbols.forEach((_, x) => {
-        const t = table(theta[x]);
-        if (!t.every((v, i) => v === task.delta(i, x))) allOk = false;
-        gam = Math.min(gam, ...margins(theta[x]));
-      });
-      sGam.set(`${gam.toFixed(3)}${allOk ? "" : "  (some table is wrong: R3 fails)"}`, allOk ? "good" : "bad");
-      sGuar.set(
-        delta < gam / 2 ? `yes (${delta.toFixed(2)} &lt; ${(gam / 2).toFixed(2)}): tables unchanged at every length` : `no (${delta.toFixed(2)} ≥ ${(gam / 2).toFixed(2)}): a column may be reordered`,
-        delta < gam / 2 ? "good" : "warn",
-      );
-      sRun.set(`${NB.fmtInt(steps)} / ${NB.fmtInt(errors)}` + (firstErr ? ` (first at step ${firstErr})` : ""), errors ? "bad" : "good");
     }
 
     function draw() {
@@ -241,7 +214,6 @@
       tabBtns.forEach((b, x) => b.classList.toggle("on", x === cur));
       drawHeat();
       drawRun();
-      paintStats();
     }
     setup("trained");
   });

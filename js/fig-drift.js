@@ -12,8 +12,6 @@
   const THETA = NB.TWO_PI / N;
   const BOUND = Math.PI / N;
   const T_MAX = 1e8;
-  const LN_MAX = Math.log(Number.MAX_VALUE);
-  const LN_MIN = Math.log(Number.MIN_VALUE);
 
   // Round-to-nearest-even to a binary format with p significant bits and smallest normal
   // exponent emin (subnormals included). |x| ≤ 1 here, so overflow never occurs.
@@ -50,7 +48,7 @@
   NB.register("fig-drift", function (root) {
     let fi = 1; // bf16: fails within a few hundred steps
     let t = 0;
-    let speed = 3;
+    let speed = 1;
 
     // ---------------------------------------------------------------- controls
     const ctr = NB.controls(root);
@@ -90,14 +88,6 @@
     const pp = new NB.Plot(pS, { width: 480, height: 200, x: [1, T_MAX], xlog: true, y: [-1.35 * BOUND, 1.35 * BOUND], margin: { l: 52, b: 34, t: 10 } });
     const rp = new NB.Plot(pS, { width: 480, height: 170, x: [1, T_MAX], xlog: true, y: [-1, 1], margin: { l: 52, b: 34, t: 10 } });
     NB.legend(pS, FORMATS.map((f) => ({ label: f.label, color: f.color })));
-
-    const stats = NB.h("div", { class: "nb-stats" });
-    root.appendChild(stats);
-    const sT = NB.stat(stats, "step t");
-    const sQ = NB.stat(stats, "true state / readout");
-    const sP = NB.stat(stats, "phase error Δθ<sub>t</sub> (fails at ±π/7)");
-    const sR = NB.stat(stats, "‖h<sub>t</sub>‖ (1 for the exact rotation)");
-    const sF = NB.stat(stats, "first wrong readout");
 
     // ---------------------------------------------------------------- the circle
     const C = W / 2;
@@ -215,13 +205,8 @@
     function draw() {
       const r = ROWS[fi];
       NB.live("fig-drift", { fmt: r.f.label, t });
-      const { st, ok } = drawCircle();
+      drawCircle();
       drawSweep();
-      sT.set(t.toLocaleString("en-US"));
-      sQ.set(`${st.q} / ${st.read}`, ok ? "good" : "bad");
-      sP.set(`${st.err < 0 ? "−" : st.err > 0 ? "+" : ""}${NB.fmtSci(Math.abs(st.err))} rad`, Math.abs(st.err) < BOUND ? null : "bad");
-      sR.set(st.logn > LN_MAX ? "overflow (> 10³⁰⁸)" : st.logn < LN_MIN ? "0 (underflow)" : NB.fmtSci(Math.exp(st.logn)));
-      sF.set(isFinite(r.tFail) ? `t = ${r.tFail.toLocaleString("en-US")}` : "never", "bad");
     }
 
     pp.crosshair(

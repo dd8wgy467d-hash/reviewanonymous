@@ -54,7 +54,8 @@
       const asked = ITEMS[NB.randInt(rand, N)];
       tokens.push("who", "has", "the", asked, "?");
       void perm;
-      cur = tokens.length;
+      // open halfway through the story: every sentence is 5 tokens long
+      cur = 5 * Math.floor((N + S + 1) / 2);
       tS.el.querySelector("input").max = tokens.length;
       tS.set(cur, true);
       draw();

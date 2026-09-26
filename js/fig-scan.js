@@ -37,12 +37,6 @@
     const W = 780;
     const H = 380;
     const svg = NB.svgRoot(panel, W, H);
-    const stats = NB.h("div", { class: "nb-stats" });
-    root.appendChild(stats);
-    const sDepth = NB.stat(stats, "depth");
-    const sBud = NB.stat(stats, "budget per composite (Prop. G.1)");
-    const sEq = NB.stat(stats, "scan vs. sequential run");
-
     function newWord() {
       NB.live("fig-scan-tree", { task: taskKey === "Z" ? "cyclic(N=5)" : taskKey === "S3" ? "s3()" : "flipflop()" });
       word = Array.from({ length: L }, () => NB.randInt(rand, task.symbols.length));
@@ -97,11 +91,6 @@
         NB.s("rect", { x: cx(i) - 18, y: yS + 4, width: 36, height: 20, rx: 4, class: "chip", style: `--c:${NB.stateColor(q)}` }, svg);
         NB.s("text", { x: cx(i), y: yS + 18, class: "chip-label", "text-anchor": "middle", text: task.states[q] }, svg);
       });
-      const n = task.n;
-      sDepth.set(`${rounds} of log₂ 8 = 3 rounds (a sequential loop needs 8)`);
-      sBud.set(`b = n⌈log₂ n⌉ = ${n * Math.ceil(Math.log2(n))} bits, merge = ${n} lookups`);
-      const done = final.filter((b) => b.lo === 0).length;
-      sEq.set(done === L ? "identical at every position, whatever the tree" : `${done}/8 prefixes complete; the rest need more rounds`, done === L && allEq ? "good" : null);
     }
     const sub = (k) => String(k).split("").map((c) => "₀₁₂₃₄₅₆₇₈₉"[c]).join("");
     newWord();

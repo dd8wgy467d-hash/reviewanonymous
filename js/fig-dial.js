@@ -11,7 +11,7 @@
     const N = 5;
     let rho = 1.0;
     let eta = 0.03;
-    let worst = false;
+    let worst = true;
     let rand = NB.rng(7);
     let t, q, nominal, parts, reach;
 
@@ -41,10 +41,8 @@
     const stats = NB.h("div", { class: "nb-stats" });
     root.appendChild(stats);
     const sT = NB.stat(stats, "length t");
-    const sQ = NB.stat(stats, "true state q<sub>t</sub>");
     const sWorst = NB.stat(stats, "(T1) at this length, all η-trajectories");
     const sRand = NB.stat(stats, "random η-trajectories read correctly");
-    const sL = NB.stat(stats, "first failing length L*");
 
     const gCells = NB.s("g", {}, svg);
     const gReach = NB.s("g", {}, svg);
@@ -191,12 +189,10 @@
       NB.s("circle", { cx: plot.sx(t), cy: plot.sy(Math.min(radius(t), 1.05)), r: 4, class: "hover-dot", style: "fill:var(--c-contract)" }, plot.gData);
 
       sT.set(String(t));
-      sQ.set(String(q));
       const worstOK = reach < margin(t);
       sWorst.set(worstOK ? "every η-trajectory is read correctly" : "some η-trajectory is misread", worstOK ? "good" : "bad");
       const frac = ok / M;
       sRand.set(`${Math.round(100 * frac)}%`, frac === 1 ? "good" : frac > 0.9 ? "warn" : "bad");
-      sL.set(isFinite(Ls) ? String(Ls) : "none (η = 0 and ρ = 1)", isFinite(Ls) ? null : "good");
     }
 
     plot.crosshair(

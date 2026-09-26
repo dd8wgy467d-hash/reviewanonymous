@@ -1,4 +1,4 @@
-/* N10 — Table 1 and Table 5 (§7; App. H.4): failing length per task, model and seed.
+/* N10 — Table 1 and Table 4 (§7; App. H.4): failing length per task, model and seed.
    Values: a number is the failing length L_max; ">=X" means no failure up to X;
    "x" means the seed did not learn the task. Seeds 42..46. */
 (function () {
@@ -71,7 +71,7 @@
       label: "Show",
       options: [
         { value: "median", label: "median over seeds (Table 1)" },
-        { value: "seeds", label: "every seed (Table 5)" },
+        { value: "seeds", label: "every seed (Table 4)" },
       ],
       value: view,
       onChange: (v) => ((view = v), draw()),

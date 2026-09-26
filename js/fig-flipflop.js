@@ -5,7 +5,6 @@
 (function () {
   "use strict";
   const NB = window.NB;
-  const BATCH = 200;
   const ID = 0;
   const RESET = 1;
   const SET = 2;
@@ -15,7 +14,7 @@
     let pid = 0.97;
     let kappa = 0.9;
     let eta = 0.05;
-    let worst = false;
+    let worst = true;
     let model = "affine";
     let seed = 3;
     let L = 320; // word length, also used for the batch accuracy
@@ -61,13 +60,6 @@
       { label: "… some of them misread", color: "var(--bad)", shape: "bar" },
       { label: "misread step of this η-trajectory", color: "var(--bad)", shape: "bar" },
     ]);
-    const stats = NB.h("div", { class: "nb-stats" });
-    root.appendChild(stats);
-    const sK = NB.stat(stats, "undeclared context window k* (worst case)");
-    const sRun = NB.stat(stats, "longest identity run in this word");
-    const sErr = NB.stat(stats, "misread positions in this word");
-    const sAcc = NB.stat(stats, `sequence accuracy over ${BATCH} words of length <span class="n6-len">320</span>`, "wide");
-
     function word(rand, n, d) {
       const w = [];
       let run = 0;
@@ -192,27 +184,6 @@
         if ((h > 0 ? 1 : 0) !== r.qs[t]) NB.s("rect", { x: sx(t) - tw / 2, y: YB + 5, width: tw, height: 9, class: "misread-tick" }, svg);
       });
       NB.s("text", { x: XR, y: H - 2, class: "svg-note", "text-anchor": "end", text: "t →" }, svg);
-
-      sK.set(isFinite(ks) ? `${ks} identities` : "none: the state is restored at every step", isFinite(ks) ? "warn" : "good");
-      sRun.set(`${longest}` + (dist === "DFF" ? " (never more than 4)" : ""), longest > ks ? "bad" : "good");
-      sErr.set(String(r.errs), r.errs ? "bad" : "good");
-
-      // batch accuracy on both distributions (mirrors the DFF5 / FF columns of Table 1)
-      const acc = {};
-      for (const dd of ["DFF", "FF"]) {
-        const br = NB.rng(9000 + seed);
-        let ok = 0;
-        for (let b = 0; b < BATCH; b++) {
-          const ww = word(br, L, dd);
-          if (run(ww, br).errs === 0) ok++;
-        }
-        acc[dd] = ok / BATCH;
-      }
-      const tag = (v) => `${Math.round(100 * v)}%`;
-      sAcc.set(
-        `DFF<sub>5</sub>: <b>${tag(acc.DFF)}</b> · FF (P(id) = ${pid.toFixed(3)}): <b>${tag(acc.FF)}</b>`,
-        acc.DFF === 1 && acc.FF === 1 ? "good" : acc.DFF === 1 ? "warn" : "bad",
-      );
     }
 
     draw();

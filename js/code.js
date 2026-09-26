@@ -305,10 +305,10 @@ def noise(a, size):                        # entries of size exactly a in the wo
     return random_signs(size) * a if worst else uniform(-a, a, size=size)
 
 def step(k, x, eta_s={{eta_s}}, Delta={{delta}}):
-    # restoring organ: rd(h) reads the largest coordinate of the perturbed state
+    # inner rd: erases the perturbation of the stored state (identity on a trajectory)
     h  = one_hot(k, d) + noise(eta_s, d)
     kr = argmax(h)                         # == k whenever eta_s < 1/2
-    # executive organ: rd(θ_x · one_hot(kr)) is the argmax of column kr
+    # executive organ: θ_x · one_hot(kr) is column kr; the outer rd restores
     col = theta[x][:, kr] + noise(Delta, d)  # logit perturbation
     return argmax(col)                     # = σ_x(kr)`,
         },
@@ -379,7 +379,7 @@ def failing_length(model, threshold):        # 0.9 for baselines, 1.0 for the NF
 cell = median(failing_length(m) for m in seeds_that_learned)   # "k/5" under it`,
         },
         {
-          title: "What † means: extraction certifies every length (App. H.6.1)",
+          title: "What † means: extraction certifies every length (App. H.6.1–H.6.2)",
           src: R`def certify(model, task):
     sigma = {x: column_argmax(model.logits(x)) for x in Sigma}   # the joint tables
     c, todo = {s0: q0}, [s0]                 # joint index -> task state

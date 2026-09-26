@@ -12,7 +12,7 @@
     let a = 0.95;
     let beta = 2.0;
     let eta = 0.05;
-    let worst = false;
+    let worst = true;
     let K = 150;
     let seed = 1;
 
@@ -55,13 +55,6 @@
       { label: "run from ι(0) = −1", color: NB.stateColor(0) },
       { label: "all η-trajectories (worst case)", color: "var(--muted)", shape: "bar" },
     ]);
-    const stats = NB.h("div", { class: "nb-stats" });
-    root.appendChild(stats);
-    const sRate = NB.stat(stats, "rate inside the cells |Φ′(±1)|");
-    const sAttr = NB.stat(stats, "attractors (stable fixed points)");
-    const sGap = NB.stat(stats, "gap between the two runs at step k");
-    const sLI = NB.stat(stats, "worst case over all η-trajectories");
-
     function fixedPoints(m) {
       const out = [];
       const n = 2400;
@@ -170,24 +163,6 @@
       if (isFinite(fail)) {
         NB.s("line", { x1: tp.sx(fail), x2: tp.sx(fail), y1: tp.y0, y2: tp.y1, class: "marker-line bad" }, tp.gData);
         NB.s("text", { x: tp.sx(fail) + 5, y: tp.y1 + 12, class: "svg-note bad", text: `worst case misreads at k = ${fail}` }, tp.gData);
-      }
-
-      // ---- stats
-      const r1 = Math.abs(m.df(1));
-      sRate.set(kind === "exact" ? "0 (the cell collapses onto its attractor)" : r1.toFixed(3), r1 < 1 ? "good" : "bad");
-      const fps = fixedPoints(m).filter((f) => f.stable);
-      if (kind === "affine" && Math.abs(a - 1) < 1e-9) sAttr.set("none: every point is fixed, nothing is pulled back", "bad");
-      else if (!fps.length) sAttr.set("none: trajectories are pushed away and run off", "bad");
-      else sAttr.set(`${fps.length}, so the capacity is log₂ ${fps.length} = ${Math.log2(fps.length)} bit`, fps.length >= 2 ? "good" : "bad");
-      const gap = Math.abs(runs[0][K] - runs[1][K]);
-      sGap.set(`${gap.toFixed(3)}  (Thm 3.3(ii) asks for ≥ 2η = ${(2 * eta).toFixed(3)} at every k)`, gap >= 2 * eta ? "good" : "bad");
-      const unbounded = Math.max(Math.abs(tubes[0].out[K][1]), Math.abs(tubes[1].out[K][0])) > 50;
-      if (unbounded) sLI.set("the reachable set is unbounded: (T2) fails", "bad");
-      else if (isFinite(fail)) sLI.set(`some η-trajectory is misread from k = ${fail} on: (T1) fails`, "bad");
-      else {
-        const w = (k) => tubes[0].out[k][1] - tubes[0].out[k][0];
-        if (Math.abs(w(K) - w(K - 1)) < 1e-6) sLI.set(`read correctly at every k; the reachable set has stopped growing (width ${w(K).toFixed(3)})`, "good");
-        else sLI.set(`read correctly up to k = ${K}, but the reachable set is still growing: increase k`, "warn");
       }
     }
     const clamp = (h) => Math.max(-LIM, Math.min(LIM, h));

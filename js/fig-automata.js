@@ -31,7 +31,6 @@
     const stats = NB.h("div", { class: "nb-stats" });
     root.appendChild(stats);
     const sLen = NB.stat(stats, "|w|");
-    const sState = NB.stat(stats, "state δ<sub>w</sub>(q<sub>0</sub>)");
     const sMap = NB.stat(stats, "δ<sub>w</sub> is");
     const sMon = NB.stat(stats, "transition monoid");
     const arrow = NB.arrowMarker(gsvg, "n1-arrow", "arrowhead");
@@ -195,7 +194,6 @@
       }
 
       sLen.set(String(word.length));
-      sState.set(task.states[q]);
       const perm = new Set(dw).size === n;
       const cst = NB.isConstant(dw);
       sMap.set(

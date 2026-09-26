@@ -43,7 +43,7 @@
   };
   // The "worst case" checkbox shared by every figure that samples perturbations.
   NB.worstToggle = function (parent, onChange) {
-    return NB.toggle(parent, { label: "worst case: every perturbation has size exactly η", value: false, onChange });
+    return NB.toggle(parent, { label: "worst case: every perturbation has size exactly η", value: true, onChange });
   };
 
   // ------------------------------------------------------------------

@@ -1,4 +1,4 @@
-/* N4 — Two rates in one map (§3 Theorem 3.3; §4.2 multistability; App. F.3).
+/* N4: Two rates in one map (§3 Theorem 3.3; §4.2 multistability; App. F.3).
    Target: a symbol e that must *hold* one bit (δ_e = id on {0,1}); every non-definite
    automaton contains such a non-constant idempotent (Lemma F.11). Codes ι(0) = −1, ι(1) = +1,
    readout π(h) = [h > 0]. We iterate the 1-D map Φ_e under perturbations |e_t| ≤ η. */

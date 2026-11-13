@@ -1,5 +1,5 @@
 /* =====================================================================
-   core.js — shared helpers for the interactive notebook.
+   core.js: shared helpers for the interactive notebook.
    Everything hangs off the global namespace NB (classic scripts, so the
    page also works when opened from the file system).
    ===================================================================== */
@@ -548,7 +548,7 @@
   }
   NB.Plot = Plot;
 
-  // Legend (HTML) — items: [{label, color, dash}]
+  // Legend (HTML): items: [{label, color, dash}]
   NB.legend = function (parent, items) {
     const el = NB.h("div", { class: "nb-legend" });
     for (const it of items) {
@@ -720,27 +720,4 @@
     }
   };
 
-  // Theme toggle (light / dark), remembered per viewer when storage allows.
-  NB.initTheme = function () {
-    const btn = document.getElementById("theme-toggle");
-    let saved = null;
-    try {
-      saved = localStorage.getItem("nb-theme");
-    } catch (e) {}
-    if (saved) document.documentElement.dataset.theme = saved;
-    const isDark = () =>
-      document.documentElement.dataset.theme === "dark" ||
-      (!document.documentElement.dataset.theme && window.matchMedia("(prefers-color-scheme: dark)").matches);
-    const paint = () => btn && (btn.textContent = isDark() ? "☀ Light" : "☾ Dark");
-    paint();
-    if (btn)
-      btn.addEventListener("click", () => {
-        const next = isDark() ? "light" : "dark";
-        document.documentElement.dataset.theme = next;
-        try {
-          localStorage.setItem("nb-theme", next);
-        } catch (e) {}
-        paint();
-      });
-  };
 })();

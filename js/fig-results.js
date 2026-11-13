@@ -1,4 +1,4 @@
-/* N10 — Table 1 and Table 4 (§7; App. H.4): failing length per task, model and seed.
+/* N10: Table 1 and Table 5 (§7.1; App. H.4): failing length per task, model and seed.
    Values: a number is the failing length L_max; ">=X" means no failure up to X;
    "x" means the seed did not learn the task. Seeds 42..46. */
 (function () {
@@ -19,38 +19,41 @@
     { key: "TSO5", label: "TSO<sub>5</sub>", states: 1132, group: "textual" },
   ];
   const MODELS = [
-    { key: "nfsm", label: "NFSM", sub: "1 layer (2 on TSO), multistable", color: "var(--c-nfsm)" },
-    { key: "mamba", label: "Mamba<sup>−</sup>", sub: "4 × 256, affine, ρ &lt; 1", color: "var(--c-contract)" },
-    { key: "aussm", label: "AUSSM", sub: "4 × 256, affine, ρ = 1", color: "var(--c-iso)" },
-    { key: "pdssm", label: "PD-SSM", sub: "4 × 256, affine, ρ &lt; 1 (hardmax on the input)", color: "var(--c-contract)" },
+    { key: "nfsm", label: "Neural-FSM", sub: "1 layer (2 on TSO), restoring", color: "var(--m-nfsm)" },
+    { key: "mamba", label: "Mamba<sup>−</sup>", sub: "4 × 256, affine, ρ &lt; 1", color: "var(--m-mamba)" },
+    { key: "pdssm", label: "PD-SSM", sub: "4 × 256, affine, ρ &lt; 1", color: "var(--m-pdssm)" },
+    { key: "mingru", label: "minGRU<sup>−</sup>", sub: "4 × 256, affine, ρ &lt; 1", color: "var(--m-mingru)" },
+    { key: "aussm", label: "AUSSM", sub: "4 × 256, affine, ρ = 1", color: "var(--m-aussm)" },
+    { key: "deltaproduct", label: "DeltaProduct", sub: "4 × 256, n<sub>h</sub> = 2, affine, ρ = 1", color: "var(--m-deltaproduct)" },
   ];
   const G = (s) => s.split(" ");
+  // Table 5 of the paper, seeds 42 to 46
   const DATA = {
-    Z2: { nfsm: G(">=1M >=1M >=1M >=1M >=1M"), mamba: G("4352 5176 326 655 >=512k"), aussm: G("274 115 144 101 151"), pdssm: G("102 117 105 119 110") },
-    Z16: { nfsm: G(">=1M >=1M >=1M >=1M >=1M"), mamba: G("78 91 83 87 x"), aussm: G("110 108 145 135 142"), pdssm: G("98 117 94 98 97") },
-    S3: { nfsm: G(">=1M >=1M >=1M >=1M >=1M"), mamba: G("155 163 186 197 200"), aussm: G("102 168 128 216 100"), pdssm: G("130 89 133 139 149") },
-    S4: { nfsm: G(">=1M >=1M >=1M >=1M >=1M"), mamba: G("103 x 113 92 107"), aussm: G("103 83 83 89 98"), pdssm: G("113 144 101 131 171") },
-    A5: { nfsm: G(">=1M >=1M >=1M >=1M >=1M"), mamba: G("x x x x x"), aussm: G("81 82 81 82 86"), pdssm: G("187 179 288 189 141") },
-    M11: { nfsm: G(">=32k >=32k >=32k >=32k >=32k"), mamba: G("x x x x x"), aussm: G("x x x x x"), pdssm: G("x x x x x") },
-    DFF5: { nfsm: G(">=1M >=1M >=1M >=1M >=1M"), mamba: G(">=1M >=1M >=1M >=512k >=512k"), aussm: G("102 120 93 96 87"), pdssm: G(">=256k >=256k >=256k >=256k >=256k") },
-    FF: { nfsm: G(">=1M >=1M >=1M >=1M >=1M"), mamba: G("178 173 143 181 1738"), aussm: G("70 119 148 116 146"), pdssm: G("192 105 133 115 169") },
-    TSO3: { nfsm: G(">=1M >=1M >=1M >=1M >=1M"), mamba: G("1583 x x 1420 x"), aussm: G("x x x x x"), pdssm: G("358 575 363 286 503") },
-    TSO4: { nfsm: G(">=1M >=1M >=1M >=1M >=1M"), mamba: G("x x x x x"), aussm: G("x x x x x"), pdssm: G("x 1922 x x x") },
-    TSO5: { nfsm: G(">=128k >=128k >=128k >=128k >=128k"), mamba: G("x x x x x"), aussm: G("x x x x x"), pdssm: G("x x x 321 x") },
+    Z2: { nfsm: G(">=1M >=1M >=1M >=1M >=1M"), mamba: G("4352 5176 326 655 >=512k"), pdssm: G("102 117 105 119 110"), mingru: G("4122 1211 2134 5448 951"), aussm: G("274 115 144 101 151"), deltaproduct: G("824 193 586 144 711") },
+    Z16: { nfsm: G(">=1M >=1M >=1M >=1M >=1M"), mamba: G("78 91 83 87 x"), pdssm: G("98 117 94 98 97"), mingru: G("101 119 128 79 117"), aussm: G("110 108 145 135 142"), deltaproduct: G("96 88 85 92 97") },
+    S3: { nfsm: G(">=1M >=1M >=1M >=1M >=1M"), mamba: G("155 163 186 197 200"), pdssm: G("130 89 133 139 149"), mingru: G("209 257 246 291 240"), aussm: G("102 168 128 216 100"), deltaproduct: G("240 319 815 159 205") },
+    S4: { nfsm: G(">=1M >=1M >=1M >=1M >=1M"), mamba: G("103 x 113 92 107"), pdssm: G("113 144 101 131 171"), mingru: G("113 81 93 87 99"), aussm: G("103 83 83 89 98"), deltaproduct: G("400 384 214 222 257") },
+    A5: { nfsm: G(">=1M >=1M >=1M >=1M >=1M"), mamba: G("x x x x x"), pdssm: G("187 179 288 189 141"), mingru: G("x x x x x"), aussm: G("81 82 81 82 86"), deltaproduct: G("242 252 194 197 232") },
+    M11: { nfsm: G(">=32k >=32k >=32k >=32k >=32k"), mamba: G("x x x x x"), pdssm: G("x x x x x"), mingru: G("x x x x x"), aussm: G("x x x x x"), deltaproduct: G("x x x x x") },
+    DFF5: { nfsm: G(">=1M >=1M >=1M >=1M >=1M"), mamba: G(">=1M >=1M >=1M >=512k >=512k"), pdssm: G(">=256k >=256k >=256k >=256k >=256k"), mingru: G(">=1M >=1M >=1M >=1M >=1M"), aussm: G("102 120 93 96 87"), deltaproduct: G("336 588 507 297 280") },
+    FF: { nfsm: G(">=1M >=1M >=1M >=1M >=1M"), mamba: G("178 173 143 181 1738"), pdssm: G("192 105 133 115 169"), mingru: G("236 191 324 227 300"), aussm: G("70 119 148 116 146"), deltaproduct: G("5633 4461 28223 6145 31366") },
+    TSO3: { nfsm: G(">=1M >=1M >=1M >=1M >=1M"), mamba: G("1583 x x 1420 x"), pdssm: G("358 575 363 286 503"), mingru: G("341 342 342 342 1459"), aussm: G("x x x x x"), deltaproduct: G("1212 1428 1332 1350 1537") },
+    TSO4: { nfsm: G(">=1M >=1M >=1M >=1M >=1M"), mamba: G("x x x x x"), pdssm: G("x 1922 x x x"), mingru: G("x x x x x"), aussm: G("x x x x x"), deltaproduct: G("1988 1453 1463 1140 1573") },
+    TSO5: { nfsm: G(">=128k >=128k >=128k >=128k >=128k"), mamba: G("x x x x x"), pdssm: G("x x x 321 x"), mingru: G("x x x x x"), aussm: G("x x x x x"), deltaproduct: G("1232 1368 1732 1324 1099") },
   };
-  // medians exactly as reported in Table 1
+  // medians exactly as reported in Table 1, in the order of MODELS
   const MED = {
-    Z2: [">=1M", "4352", "144", "110"],
-    Z16: [">=1M", "85", "135", "98"],
-    S3: [">=1M", "186", "128", "133"],
-    S4: [">=1M", "105", "89", "131"],
-    A5: [">=1M", "x", "82", "187"],
-    M11: [">=32k", "x", "x", "x"],
-    DFF5: [">=1M", ">=1M", "96", ">=256k"],
-    FF: [">=1M", "178", "119", "133"],
-    TSO3: [">=1M", "1501", "x", "363"],
-    TSO4: [">=1M", "x", "x", "1922"],
-    TSO5: [">=128k", "x", "x", "321"],
+    Z2: [">=1M", "4352", "110", "2134", "144", "586"],
+    Z16: [">=1M", "85", "98", "117", "135", "92"],
+    S3: [">=1M", "186", "133", "246", "128", "240"],
+    S4: [">=1M", "105", "131", "93", "89", "257"],
+    A5: [">=1M", "x", "187", "x", "82", "232"],
+    M11: [">=32k", "x", "x", "x", "x", "x"],
+    DFF5: [">=1M", ">=1M", ">=256k", ">=1M", "96", "336"],
+    FF: [">=1M", "178", "133", "236", "119", "6145"],
+    TSO3: [">=1M", "1501", "363", "342", "x", "1350"],
+    TSO4: [">=1M", "x", "1922", "x", "x", "1463"],
+    TSO5: [">=128k", "x", "321", "x", "x", "1324"],
   };
   const CERT = new Set(["Z2", "Z16", "S3", "S4", "A5", "M11", "DFF5", "FF"]); // tables extracted and matched
 
@@ -71,7 +74,7 @@
       label: "Show",
       options: [
         { value: "median", label: "median over seeds (Table 1)" },
-        { value: "seeds", label: "every seed (Table 4)" },
+        { value: "seeds", label: "every seed (Table 5)" },
       ],
       value: view,
       onChange: (v) => ((view = v), draw()),
@@ -82,8 +85,9 @@
     root.appendChild(note);
     note.innerHTML =
       "Cell shade: log of the failing length L<sub>max</sub> (longer is darker). ≥ L: no failure up to the longest length that fits on one GPU. " +
-      "† the extracted tables match the target, which certifies every length. × no seed learned the task. Hover a cell for the seeds. " +
-      "Baselines fail below 90% accuracy, the NFSM below 100%. Algebraic tasks trained at L = 64, TSO at L = 256.";
+      "† the extracted tables match the target, which certifies correctness at every length provided the logit margin exceeds the error of the logit computation. " +
+      "× no seed learned the task. k/5: seeds that learned it. Hover a cell for the seeds. " +
+      "Baselines fail below 90% accuracy, the Neural-FSM below 100%. Algebraic tasks trained at L = 64, TSO at L = 256.";
 
     function shade(p) {
       if (p.x) return "";

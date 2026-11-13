@@ -1,4 +1,4 @@
-/* N6 — Definite vs non-definite: the flip-flop (§4.1, Theorem 4.1(ii), Prop. F.13; §7, Table 1).
+/* N6: Definite vs non-definite: the flip-flop (§4.1, Theorem 4.1(ii), Prop. F.13; §7, Table 1).
    Affine tracker:  set: h ← +1 + e,  reset: h ← −1 + e,  id: h ← κh + e,  |e| ≤ η,  π(h) = [h > 0].
    κ is the memory factor of the identity: the fraction of h an identity step keeps.
    Restoring tracker: the same step followed by a snap to the nearest code point ±1. */

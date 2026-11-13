@@ -1,4 +1,4 @@
-/* N8 — One NFSM head (§6, eq. (6); Props. G.1–G.3).
+/* N8: One Neural-FSM head (§6, eq. (6); Props. G.1 to G.3).
    Φ_x(h) = rd(θ_x rd(h)),  rd(h) = one-hot of argmax_j h_j.
    σ_x(k) = argmax_j (θ_x)_{jk}: the table is the column-wise argmax of the logits.
    Perturbations only reach the logits; a perturbation below half the smallest column

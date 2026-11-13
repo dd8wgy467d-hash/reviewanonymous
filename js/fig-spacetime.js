@@ -1,4 +1,4 @@
-/* N3 — Figure 1 of the paper, live (§3, Theorems 3.1–3.2).
+/* N3: Figure 1 of the paper, live (§3, Theorems 3.1 and 3.2).
    A 1-D caricature of ℋ split into five cells U_q (bands). One step maps the cell
    U_q onto U_{δ_x(q)} by  Φ_x(h) = c_{δ_x(q)} + λ (h − c_q),  then adds e ∈ [−η, η].
    λ = 1: executive organ only (a translation, nothing restores).

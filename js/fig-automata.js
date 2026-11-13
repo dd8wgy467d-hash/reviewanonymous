@@ -1,4 +1,4 @@
-/* N1 — State tracking as a semiautomaton (paper §2, "State tracking and automata"). */
+/* N1: State tracking as a semiautomaton (paper §2, "State tracking and automata"). */
 (function () {
   "use strict";
   const NB = window.NB;

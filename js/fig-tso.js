@@ -1,7 +1,7 @@
-/* N11 — Tracking Shuffled Objects (§7; App. H.1 and H.6.3).
+/* N11: Tracking Shuffled Objects (§7; App. H.1 and H.7.3).
    The token-level automaton of App. H.1: state (p, g), with p the first name of the sentence in
-   progress (or idle) and g the holder of every item (or unset). The trained 2-layer NFSM keeps one
-   second-layer head per item, holding exactly the holder register shown here (Figure 5). */
+   progress (or idle) and g the holder of every item (or unset). The trained 2-layer Neural-FSM keeps one
+   second-layer head per item, holding exactly the holder register shown here (Figure 6). */
 (function () {
   "use strict";
   const NB = window.NB;

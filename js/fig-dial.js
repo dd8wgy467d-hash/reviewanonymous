@@ -1,4 +1,4 @@
-/* N2 — Realizing ℤ_5 with an affine RNN at finite precision (paper §2, Defs 2.1–2.2).
+/* N2: Realizing ℤ_5 with an affine RNN at finite precision (paper §2, Defs 2.1 and 2.2).
    h_t = ρ R(2π x_t / N) h_{t-1} + e_t,  ‖e_t‖ ≤ η (= η in the worst case);  ι(q) = (cos 2πq/N, sin 2πq/N);
    π(h) = the sector containing h, undefined near the origin. */
 (function () {

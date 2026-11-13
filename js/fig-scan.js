@@ -1,5 +1,5 @@
-/* N7 — Scan compatibility is a budget (§5: Def. 5.1, Prop. 5.2; App. D, Figure 2; Prop. G.1).
-   (a) A parallel (Hillis–Steele) scan over transition tables: every merge is a gather, exact.
+/* N7: Scan compatibility is a budget (§5: Def. 5.1, Prop. 5.2; App. D, Figure 3; Prop. G.1).
+   (a) A parallel (Hillis-Steele) scan over transition tables: every merge is a gather, exact.
    (b) The same scan over affine pairs (A, b) in a low-precision format: the tree rounds in a
        different order than the sequential loop, and the two trajectories drift apart. */
 (function () {
@@ -33,7 +33,7 @@
     const rs = NB.slider(ctr, { label: "rounds shown", min: 0, max: 3, step: 1, value: rounds, onInput: (v) => ((rounds = v), draw()) });
     NB.button(ctr, "New word", newWord, { cls: "ghost" });
 
-    const panel = NB.panel(root, "Hillis–Steele scan over 8 transition tables. A box holds the composite table of the span [i..j]; a table lists δ(q) for q = 0, 1, …", "wide");
+    const panel = NB.panel(root, "Hillis-Steele scan over 8 transition tables. A box holds the composite table of the span [i..j]; a table lists δ(q) for q = 0, 1, …", "wide");
     const W = 780;
     const H = 380;
     const svg = NB.svgRoot(panel, W, H);
@@ -120,7 +120,7 @@
     NB.legend(panel, [
       { label: "affine, contracting (ρ<sub>x</sub> ∈ [0.9, 0.999])", color: "var(--c-contract)" },
       { label: "affine, isometric (ρ<sub>x</sub> = 1)", color: "var(--c-iso)" },
-      { label: "NFSM tables: the gap is exactly 0 at every step", color: "var(--c-nfsm)" },
+      { label: "Neural-FSM tables: the gap is exactly 0 at every step", color: "var(--c-nfsm)" },
     ]);
     let res = null;
 
@@ -159,7 +159,7 @@
               seqRe[t] = hr;
               seqIm[t] = hi;
             }
-            // parallel (Hillis–Steele) over (A, b)
+            // parallel (Hillis-Steele) over (A, b)
             let Ar = new Float64Array(L);
             let Ai = new Float64Array(L);
             let Br = new Float64Array(L);
@@ -229,7 +229,7 @@
       plot.line(res.contract, { class: "series", style: "stroke:var(--c-contract)" });
       plot.line(res.iso, { class: "series", style: "stroke:var(--c-iso)" });
       NB.s("line", { x1: plot.x0, x2: plot.x1, y1: plot.y0 - 3, y2: plot.y0 - 3, class: "series thick", style: "stroke:var(--c-nfsm)" }, plot.gData);
-      NB.s("text", { x: plot.x1 - 4, y: plot.y0 - 9, class: "svg-note", "text-anchor": "end", text: "NFSM: 0 (log scale floor)" }, plot.gData);
+      NB.s("text", { x: plot.x1 - 4, y: plot.y0 - 9, class: "svg-note", "text-anchor": "end", text: "Neural-FSM: 0 (log scale floor)" }, plot.gData);
     }
     plot.crosshair(
       () =>

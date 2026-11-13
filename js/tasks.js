@@ -1,5 +1,5 @@
 /* =====================================================================
-   tasks.js — the semiautomata used across the notebook.
+   tasks.js: the semiautomata used across the notebook.
    A task is (Q, Σ, δ): n states, a list of symbols, delta(q, xIndex).
    ===================================================================== */
 (function () {

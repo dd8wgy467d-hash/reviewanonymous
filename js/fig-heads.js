@@ -1,4 +1,4 @@
-/* N9 — Heads as memory channels (§6; Prop. G.4, Example G.7; App. H.6.2, the S_3 model of seed 42).
+/* N9: Heads as memory channels (§6; Prop. G.4, Example G.7; App. H.7.2, the S_3 model of seed 42).
    S_3 as three cups. Head 1 (3 indices) carries where ball 1 is; head 2 (2 indices) carries the
    parity of the arrangement. Together they determine it: c(j, k) is unique in S_3. */
 (function () {
@@ -7,7 +7,7 @@
 
   NB.register("fig-heads", function (root) {
     let arr = [1, 2, 3]; // arr[p] = ball in cup p
-    // the two heads run on their own tables (App. H.6.2); they never look at the cups
+    // the two heads run on their own tables (App. H.7.2); they never look at the cups
     const SIGMA1 = [[2, 1, 3], [1, 3, 2]]; // head 1, for x1 = (1 2) and x2 = (2 3)
     const SIGMA2 = [[2, 1], [2, 1]]; // head 2 flips at every symbol
     let j = 1; // head 1 index
@@ -67,7 +67,7 @@
       });
       NB.s("text", { x: 20, y: 170, class: "svg-note", text: "Head 1 applies each swap to its index: σ¹(1 2) = (2, 1, 3),  σ¹(2 3) = (1, 3, 2)." }, csvg);
       NB.s("text", { x: 20, y: 188, class: "svg-note", text: "Head 2 flips at every symbol: σ²(1 2) = σ²(2 3) = (2, 1).  These are the tables" }, csvg);
-      NB.s("text", { x: 20, y: 206, class: "svg-note", text: "extracted from the trained S₃ model (App. H.6.2)." }, csvg);
+      NB.s("text", { x: 20, y: 206, class: "svg-note", text: "extracted from the trained S₃ model (App. H.7.2)." }, csvg);
 
       // decoder table
       NB.clear(dwrap);

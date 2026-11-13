@@ -1,5 +1,5 @@
 /* =====================================================================
-   code.js — the back of every figure: Python-style pseudocode that
+   code.js: the back of every figure: Python-style pseudocode that
    mirrors what the figure's JavaScript executes.
    {{name}} is a live value, filled from NB.live(figureId, {name: value}).
    Keep these in sync with js/fig-*.js.
@@ -39,7 +39,7 @@ is_permutation = len(set(delta_w)) == len(Q)`,
       file: "js/fig-dial.js",
       blocks: [
         {
-          title: "An affine RNN realizing ℤ_5 (eqs. 2–3)",
+          title: "An affine RNN realizing ℤ_5 (eqs. 2 and 3)",
           src: R`N, rho, eta = 5, {{rho}}, {{eta}}
 
 def iota(q):                        # encoding: code points on the unit circle
@@ -170,7 +170,7 @@ capacity   = log2(len(attractors))     # robust capacity (Def. F.20, Prop. F.21)
       file: "js/fig-drift.js",
       blocks: [
         {
-          title: "A perfectly trained rotation, rounded once (App. E, Figure 3)",
+          title: "A perfectly trained rotation, rounded once (App. E, Figure 4)",
           src: R`N = 7
 theta = 2*pi/N                           # exact solution: rotate by 2π/7 (ρ = 1)
 bound = pi/N                             # half the angle between two code points
@@ -250,7 +250,7 @@ tables = [[delta(q, x) for q in Q] for x in word]    # σ_x as a list: σ_x[q]
 def compose(later, earlier):                         # a gather: n integer lookups, exact
     return [later[q] for q in earlier]
 
-P, d = tables[:], 1                                  # Hillis–Steele inclusive scan
+P, d = tables[:], 1                                  # Hillis-Steele inclusive scan
 while d < len(P):                                    # log2(8) = 3 rounds
     P = [compose(P[i], P[i - d]) if i >= d else P[i] for i in range(len(P))]
     d *= 2
@@ -266,7 +266,7 @@ states = [P[t][q0] for t in range(len(P))]           # identical to the sequenti
       file: "js/fig-scan.js",
       blocks: [
         {
-          title: "One affine model, two evaluation orders (App. D, Figure 2)",
+          title: "One affine model, two evaluation orders (App. D, Figure 3)",
           src: R`rnd = round_to_{{fmt}}                 # applied after EVERY multiply and add
 L   = {{L}}
 # per letter x and per channel: A_x = ρ_x·e^{iθ_x} (complex), b_x ~ N(0, 0.3²)
@@ -286,7 +286,7 @@ while d < L:
 h_par = [b for (A, b) in P]              # h_0 = 0, so h_t is the b-part
 
 gap[t] = max over channels |h_par[t] - h_seq[t]|     # mean over 2 words
-# NFSM: composites are integer tables → gap is exactly 0`,
+# Neural-FSM: composites are integer tables → gap is exactly 0`,
         },
       ],
     },
@@ -335,7 +335,7 @@ theta[x][j, k] = max(theta[x][i, k] for i != j) + 0.3 + noise   # make it the ar
       file: "js/fig-heads.js",
       blocks: [
         {
-          title: "S₃ carried by two heads (Prop. G.4, App. H.6.2)",
+          title: "S₃ carried by two heads (Prop. G.4, App. H.7.2)",
           src: R`sigma1 = {"(1 2)": (2, 1, 3), "(2 3)": (1, 3, 2)}   # head 1: 3 indices
 sigma2 = {"(1 2)": (2, 1),    "(2 3)": (2, 1)}      # head 2: 2 indices
 
@@ -370,7 +370,7 @@ n_1_heads = dict(bits=(n - 1) * n * ceil(log2(n)),           logits=n**2)  # sha
     words = sample_words(512, length=L)
     return mean(all(model(w)[t] == target(w)[t] for t in range(L)) for w in words)
 
-def failing_length(model, threshold):        # 0.9 for baselines, 1.0 for the NFSM
+def failing_length(model, threshold):        # 0.9 for baselines, 1.0 for the Neural-FSM
     for L in tested_lengths:                 # up to what fits on one GPU
         if sequence_accuracy(model, L) < threshold:
             return L
@@ -379,7 +379,7 @@ def failing_length(model, threshold):        # 0.9 for baselines, 1.0 for the NF
 cell = median(failing_length(m) for m in seeds_that_learned)   # "k/5" under it`,
         },
         {
-          title: "What † means: extraction certifies every length (App. H.6.1–H.6.2)",
+          title: "What † means: extraction certifies every length (App. H.7.1 to H.7.2)",
           src: R`def certify(model, task):
     sigma = {x: column_argmax(model.logits(x)) for x in Sigma}   # the joint tables
     c, todo = {s0: q0}, [s0]                 # joint index -> task state
@@ -426,22 +426,5 @@ answer = g[asked_item]                    # read off at the last token`,
       ],
     },
 
-    // ------------------------------------------------------------ N12
-    "fig-pca": {
-      file: "js/fig-pca.js",
-      blocks: [
-        {
-          title: "How each animation was made (App. H.5, offline)",
-          src: R`model = load(task="Z5", seed={{seed}}, layers={{layers}})
-word  = ["+1"] * T                               # the constant word (+1)^T
-H     = model.last_recurrent_states(word)        # one state per step
-Z     = PCA(n_components=2).fit_transform(H)     # fit on this run alone
-
-for window in three_windows(T):                  # early, middle, late
-    scatter(Z[window], color=target_state[window])        # t mod 5
-    shade(decision_regions(model.classifier, plane=PCA))  # what the readout sees`,
-        },
-      ],
-    },
   };
 })();

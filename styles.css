@@ -1,126 +1,58 @@
 /* =====================================================================
-   Interactive companion — styles
-   Colour roles are tokens; dark values are stepped for the dark surface.
+   Interactive companion: styles. Light theme only; colour roles are tokens.
    ===================================================================== */
 :root {
   color-scheme: light;
-  --bg: #fcfcfb;
-  --panel: #f5f4f0;
+  --bg: #ffffff;
+  --panel: #f7f7f5;
   --panel-2: #ffffff;
-  --ink: #0b0b0b;
-  --ink-2: #52514e;
-  --muted: #898781;
-  --grid: #e1e0d9;
-  --axis: #c3c2b7;
-  --border: rgba(11, 11, 11, 0.1);
-  --accent: #d95926;
+  --ink: #1d1d1f;
+  --ink-2: #4a4a4f;
+  --muted: #5f5f5f;
+  --grid: #ececec;
+  --axis: #c9c9c9;
+  --border: rgba(0, 0, 0, 0.1);
+  --accent: #0a3fa8;
 
-  /* model semantics, fixed across the page */
-  --c-contract: #2a78d6; /* affine, ρ < 1 */
-  --c-nfsm: #eb6834; /* restoring / NFSM */
-  --c-iso: #1baf7a; /* affine, ρ = 1 */
+  /* model roles, fixed across the page (same hues as the paper's figures) */
+  --c-nfsm: #0a3fa8; /* Neural-FSM, restoring */
+  --c-contract: #a86416; /* affine, rho < 1 */
+  --c-iso: #2e6b47; /* affine, rho = 1 */
+  --m-nfsm: #0f62fe;
+  --m-mamba: #a8475f;
+  --m-mingru: #a86416;
+  --m-pdssm: #5a4230;
+  --m-aussm: #2e6b47;
+  --m-deltaproduct: #5b3fa8;
 
-  /* automaton states (categorical order) */
-  --s0: #2a78d6;
-  --s1: #eb6834;
-  --s2: #1baf7a;
-  --s3: #eda100;
-  --s4: #e87ba4;
-  --s5: #008300;
-  --s6: #4a3aa7;
-  --s7: #e34948;
+  /* automaton states: sharply different hues */
+  --s0: #0033cc;
+  --s1: #dd5c00;
+  --s2: #006611;
+  --s3: #cc0077;
+  --s4: #5500b3;
+  --s5: #0f7c8c;
+  --s6: #8a6a50;
+  --s7: #9a4c7a;
 
-  --code: #4a3aa7;
-  --good: #0ca30c;
-  --good-text: #006300;
-  --bad: #d03b3b;
-  --warn: #b27400;
-  --seq: #1c5cab;
-  --band-alpha: 0.16;
-  --code-panel: #f1f0eb;
-  --tk-kw: #7b3fb0;
-  --tk-str: #1d7a3e;
-  --tk-num: #b35300;
-  --tk-fn: #1c5cab;
+  --code: #5500b3;
+  --good: #1f8a3a;
+  --good-text: #146b2c;
+  --bad: #b3261e;
+  --warn: #a86416;
+  --seq: #2c5488;
+  --band-alpha: 0.18;
+  --code-panel: #f5f5f3;
+  --tk-kw: #6e3557;
+  --tk-str: #336b41;
+  --tk-num: #a86416;
+  --tk-fn: #2c5488;
   --tk-bi: #0f6f73;
 
-  --serif: "Source Serif 4", Georgia, "Times New Roman", serif;
-  --sans: Inter, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --serif: "Source Sans Pro", "Helvetica Neue", Arial, sans-serif;
+  --head: Lato, "Helvetica Neue", Arial, sans-serif;
+  --sans: Lato, "Helvetica Neue", Arial, sans-serif;
   --mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
-}
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
-    color-scheme: dark;
-    --bg: #141413;
-    --panel: #1c1c1b;
-    --panel-2: #232322;
-    --ink: #f4f3ef;
-    --ink-2: #c3c2b7;
-    --muted: #8f8d86;
-    --grid: #2c2c2a;
-    --axis: #45443f;
-    --border: rgba(255, 255, 255, 0.1);
-    --accent: #eb6834;
-    --c-contract: #3987e5;
-    --c-nfsm: #e0652f;
-    --c-iso: #199e70;
-    --s0: #3987e5;
-    --s1: #d95926;
-    --s2: #199e70;
-    --s3: #c98500;
-    --s4: #d55181;
-    --s5: #1a9a1a;
-    --s6: #9085e9;
-    --s7: #e66767;
-    --code: #9085e9;
-    --good-text: #3cc13c;
-    --bad: #e66767;
-    --warn: #e0a526;
-    --seq: #6da7ec;
-    --band-alpha: 0.2;
-  --code-panel: #181817;
-  --tk-kw: #c3a6f5;
-  --tk-str: #7fd39a;
-  --tk-num: #f2a65e;
-  --tk-fn: #86b6ef;
-  --tk-bi: #6fd0d3;
-  }
-}
-:root[data-theme="dark"] {
-  color-scheme: dark;
-  --bg: #141413;
-  --panel: #1c1c1b;
-  --panel-2: #232322;
-  --ink: #f4f3ef;
-  --ink-2: #c3c2b7;
-  --muted: #8f8d86;
-  --grid: #2c2c2a;
-  --axis: #45443f;
-  --border: rgba(255, 255, 255, 0.1);
-  --accent: #eb6834;
-  --c-contract: #3987e5;
-  --c-nfsm: #e0652f;
-  --c-iso: #199e70;
-  --s0: #3987e5;
-  --s1: #d95926;
-  --s2: #199e70;
-  --s3: #c98500;
-  --s4: #d55181;
-  --s5: #1a9a1a;
-  --s6: #9085e9;
-  --s7: #e66767;
-  --code: #9085e9;
-  --good-text: #3cc13c;
-  --bad: #e66767;
-  --warn: #e0a526;
-  --seq: #6da7ec;
-  --band-alpha: 0.2;
-  --code-panel: #181817;
-  --tk-kw: #c3a6f5;
-  --tk-str: #7fd39a;
-  --tk-num: #f2a65e;
-  --tk-fn: #86b6ef;
-  --tk-bi: #6fd0d3;
 }
 
 * {
@@ -175,11 +107,6 @@ code {
   color: var(--muted);
   font-weight: 400;
   margin-left: 6px;
-}
-.topbar-right {
-  display: flex;
-  align-items: center;
-  gap: 12px;
 }
 .site-back {
   font: 400 13px var(--sans);
@@ -264,7 +191,7 @@ code {
   margin: 0 0 12px;
 }
 h1 {
-  font: 600 clamp(30px, 5vw, 44px) / 1.12 var(--serif);
+  font: 700 clamp(30px, 5vw, 44px) / 1.12 var(--head);
   margin: 0 0 18px;
   letter-spacing: -0.01em;
 }
@@ -289,7 +216,7 @@ h1 {
   margin: 0;
 }
 h2 {
-  font: 600 28px/1.25 var(--serif);
+  font: 700 28px/1.25 var(--head);
   margin: 56px 0 12px;
 }
 h2.small {
@@ -300,7 +227,7 @@ h2.small {
   margin: 0 0 8px;
 }
 h3 {
-  font: 600 21px/1.3 var(--serif);
+  font: 700 21px/1.3 var(--head);
   margin: 36px 0 8px;
 }
 p {
@@ -972,16 +899,6 @@ i.dot {
 .nb-table.results td.cell.deep .sub {
   color: rgba(255, 255, 255, 0.82);
 }
-:root[data-theme="dark"] .nb-table.results td.cell.deep,
-:root[data-theme="dark"] .nb-table.results td.cell.deep .sub {
-  color: #0b0b0b;
-}
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) .nb-table.results td.cell.deep,
-  :root:not([data-theme="light"]) .nb-table.results td.cell.deep .sub {
-    color: #0b0b0b;
-  }
-}
 .nb-table.results tr.nfsm th.model {
   color: var(--accent);
 }
@@ -1055,17 +972,32 @@ i.dot {
 .nb-answer b {
   color: var(--accent);
 }
-.nb-gif-wrap {
+.nb-img-wrap {
   background: #fff;
   border-radius: 10px;
   overflow: hidden;
   border: 1px solid var(--border);
+  padding: 8px;
 }
-.nb-gif {
+.nb-img {
   display: block;
   width: 100%;
   height: auto;
-  min-height: 200px;
+}
+.nb-table.cost td,
+.nb-table.cost th {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+.nb-table.cost td:first-child,
+.nb-table.cost th:first-child,
+.nb-table.cost td:nth-child(2),
+.nb-table.cost th:nth-child(2) {
+  text-align: left;
+}
+.nb-table.cost tr.nfsm td:first-child {
+  color: var(--accent);
+  font-weight: 600;
 }
 
 /* ---------------------------------------------------------------- SVG marks */
@@ -1484,4 +1416,27 @@ i.dot {
 
 .nb-svg .misread-tick {
   fill: var(--bad);
+}
+
+/* N12: theory against data */
+.nb-explain {
+  margin-top: 12px;
+  overflow-x: auto;
+}
+.nb-table.explain td {
+  vertical-align: top;
+  font: 13px/1.45 var(--serif);
+}
+.nb-table.explain td:first-child {
+  font-weight: 600;
+  white-space: nowrap;
+}
+.nb-table.explain td:nth-child(2) {
+  white-space: nowrap;
+}
+.nb-audio {
+  display: block;
+  width: 100%;
+  height: 36px;
+  margin-bottom: 6px;
 }

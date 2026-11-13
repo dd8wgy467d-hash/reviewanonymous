@@ -1,4 +1,4 @@
-/* N5 — A perfectly trained ρ = 1 recurrence still drifts (App. E, Figure 3).
+/* N5: A perfectly trained ρ = 1 recurrence still drifts (App. E, Figure 4).
    The exact rotation of R² by 2π/7 realizes ℤ_7 under the constant word. Its entries cos and sin are
    rounded once to each number format, then the recurrence runs in fp64 from h_0 = (1, 0). The rounded
    matrix is still a scaled rotation, so the run has a closed form:

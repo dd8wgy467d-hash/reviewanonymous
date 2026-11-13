@@ -1,0 +1,26 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+build/
+.venv/
+.ipynb_checkpoints/
+
+# Generated
+wandb/
+figures/
+checkpoints/
+results/
+logs/
+/data/
+/archive/
+
+# OS / editor
+.DS_Store
+.vscode/
+.idea/
+*.swp
+
+.cache/
+.hf_cache/

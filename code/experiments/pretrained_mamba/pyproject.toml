@@ -1,0 +1,19 @@
+[project]
+name = "pretrained-mamba"
+version = "0.1.0"
+description = "Mamba-2 (130M, 370M) in JAX on RULER niah_single_1 with a fixed needle distance and a decay floor."
+requires-python = ">=3.11,<3.13"
+dependencies = [
+    "jax>=0.4.34",
+    "jax-mps>=0.10; sys_platform == 'darwin'",        # Apple GPU backend (Metal); JAX_PLATFORMS=cpu forces the CPU
+    "jax[cuda12]>=0.4.34; sys_platform == 'linux'",   # NVIDIA GPU on a cluster
+    "numpy>=1.26",
+    "tokenizers>=0.19",
+    "huggingface_hub>=0.24",
+    "torch>=2.2",           # only to unpickle pytorch_model.bin into numpy
+    "matplotlib>=3.8",
+    "pyarrow>=15",          # to read the WikiText-2 parquet for perplexity
+]
+
+[tool.uv]
+package = false
